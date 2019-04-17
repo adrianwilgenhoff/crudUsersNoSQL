@@ -1,11 +1,10 @@
 package com.aew.crud_users.repository;
 
-import java.util.List;
-
 import com.aew.crud_users.model.User;
 
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
+import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -17,20 +16,13 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public interface UserRepository extends CrudRepository<User, Long> {
-
-    /**
-     * Get the "id" user.
-     * 
-     * @param id the id of the user to find
-     * @return User
-     */
-    User findById(long id);
+public interface UserRepository extends MongoRepository<User, ObjectId> {
 
     /**
      * Get the "email" user.
      * 
      * @param email the email of the user to find
+     * 
      * @return User
      */
     public User findByEmail(String email);
@@ -57,7 +49,7 @@ public interface UserRepository extends CrudRepository<User, Long> {
      * 
      * @return List<User> Return a list ordered of users.
      */
-    @Query("SELECT u FROM User u ORDER BY lastname")
-    public List<User> findAllUserOrderedByLastname();
+    @Query(sort = "{ lastname : -1 }")
+    public Iterable<User> findAllUserOrderedByLastname();
 
 }

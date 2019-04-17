@@ -1,6 +1,6 @@
 package com.aew.crud_users.controller;
 
-import java.util.List;
+import java.util.Optional;
 
 import com.aew.crud_users.errors.BadRequestException;
 import com.aew.crud_users.errors.EmailAlreadyUsedException;
@@ -10,6 +10,7 @@ import com.aew.crud_users.errors.UsersNotFoundException;
 import com.aew.crud_users.model.User;
 import com.aew.crud_users.service.UserService;
 
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,12 +58,12 @@ public class UserController {
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully retrieved list"),
             @ApiResponse(code = 204, message = "No content to show", response = String.class) })
     @RequestMapping(value = "/users", method = RequestMethod.GET)
-    public ResponseEntity<List<User>> listAllUsers() throws UsersNotFoundException {
-        List<User> users = userService.findAllUsers();
-        if (users.isEmpty()) {
+    public ResponseEntity<Iterable<User>> listAllUsers() throws UsersNotFoundException {
+        Iterable<User> users = userService.findAllUsers();
+        if (!users.iterator().hasNext()) {
             throw new UsersNotFoundException();
         }
-        return new ResponseEntity<List<User>>(users, HttpStatus.OK);
+        return new ResponseEntity<Iterable<User>>(users, HttpStatus.OK);
 
     }
 
@@ -76,12 +77,12 @@ public class UserController {
      */
     @ApiOperation(value = "View a list of ordered users")
     @RequestMapping(value = "/users/sort", method = RequestMethod.GET)
-    public ResponseEntity<List<User>> listAllUsersOrdered() throws UsersNotFoundException {
-        List<User> users = userService.findAllUserOrderedByLastname();
-        if (users.isEmpty()) {
+    public ResponseEntity<Iterable<User>> listAllUsersOrdered() throws UsersNotFoundException {
+        Iterable<User> users = userService.findAllUserOrderedByLastname();
+        if (!users.iterator().hasNext()) {
             throw new UsersNotFoundException();
         }
-        return new ResponseEntity<List<User>>(users, HttpStatus.OK);
+        return new ResponseEntity<Iterable<User>>(users, HttpStatus.OK);
 
     }
 
@@ -96,12 +97,12 @@ public class UserController {
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully retrieved User", response = User.class),
             @ApiResponse(code = 204, message = "User not found", response = String.class) })
     @RequestMapping(value = "users/{id}", method = RequestMethod.GET)
-    public ResponseEntity<User> getUser(@PathVariable("id") long id) throws UserNotFoundException {
-        User user = userService.findById(id);
-        if (user == null) {
+    public ResponseEntity<Optional<User>> getUser(@PathVariable("id") ObjectId id) throws UserNotFoundException {
+        Optional<User> user = userService.findById(id);
+        if (!user.isPresent()) {
             throw new UserNotFoundException();
         }
-        return new ResponseEntity<User>(user, HttpStatus.OK);
+        return new ResponseEntity<Optional<User>>(user, HttpStatus.OK);
     }
 
     /**
@@ -123,7 +124,7 @@ public class UserController {
     public ResponseEntity<Void> createUser(@RequestBody User user, UriComponentsBuilder ucBuilder)
             throws BadRequestException, EmailAlreadyUsedException, UsernameAlreadyUsedException {
 
-        if (user.getId() != null) {
+        if (user.get_id() != null) {
             throw new BadRequestException();
         } else if (userService.findByEmail(user.getEmail()) != null) {
             throw new EmailAlreadyUsedException();
@@ -132,7 +133,7 @@ public class UserController {
         } else {
             userService.saveUser(user);
             HttpHeaders headers = new HttpHeaders();
-            headers.setLocation(ucBuilder.path("/api/v1/users/{id}").buildAndExpand(user.getId()).toUri());
+            headers.setLocation(ucBuilder.path("/api/v1/users/{id}").buildAndExpand(user.get_id()).toUri());
             return new ResponseEntity<Void>(headers, HttpStatus.CREATED);
         }
 
@@ -152,7 +153,7 @@ public class UserController {
         if (user == null) {
             throw new UserNotFoundException();
         }
-        userService.deleteUserById(user.getId());
+        userService.deleteUserById(user.get_id());
         LOG.info("Se ha borrado el usuario con username = " + username);
         return new ResponseEntity<>("User Deleted", HttpStatus.NO_CONTENT);
     }
@@ -175,6 +176,7 @@ public class UserController {
         if (user == null) {
             throw new UserNotFoundException();
         }
+
         currentUser.setAddress(user.getAddress());
         currentUser.setPassword(user.getPassword());
         currentUser.setTelephone(user.getTelephone());

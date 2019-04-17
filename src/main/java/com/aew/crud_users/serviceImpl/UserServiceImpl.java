@@ -1,11 +1,12 @@
 package com.aew.crud_users.serviceImpl;
 
-import java.util.List;
+import java.util.Optional;
 
 import com.aew.crud_users.model.User;
 import com.aew.crud_users.repository.UserRepository;
 import com.aew.crud_users.service.UserService;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,7 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
     @Override
-    public User findById(long id) {
+    public Optional<User> findById(ObjectId id) {
         return userRepository.findById(id);
     }
 
@@ -44,13 +45,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> findAllUserOrderedByLastname() {
+    public Iterable<User> findAllUserOrderedByLastname() {
         return userRepository.findAllUserOrderedByLastname();
     }
 
     @Override
-    public List<User> findAllUsers() {
-        return (List<User>) userRepository.findAll();
+    public Iterable<User> findAllUsers() {
+        return userRepository.findAll();
     }
 
     @Override
@@ -59,7 +60,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUserById(long id) {
+    public void deleteUserById(ObjectId id) {
         userRepository.deleteById(id);
     }
 
@@ -70,7 +71,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean isUserExist(User user) {
-        return userRepository.existsById(user.getId());
+        return userRepository.existsById(user.get_id());
     }
 
 }

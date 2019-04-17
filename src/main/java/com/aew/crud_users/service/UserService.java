@@ -1,8 +1,10 @@
 package com.aew.crud_users.service;
 
-import java.util.List;
+import java.util.Optional;
 
 import com.aew.crud_users.model.User;
+
+import org.bson.types.ObjectId;
 
 /**
  * Service interface for managing users. Defines operations that every
@@ -18,7 +20,7 @@ public interface UserService {
      * @param id id of the user to find.
      * @return user
      */
-    User findById(long id);
+    Optional<User> findById(ObjectId id);
 
     /**
      * Get the "email" user.
@@ -50,14 +52,14 @@ public interface UserService {
      * 
      * @return user
      */
-    List<User> findAllUserOrderedByLastname();
+    Iterable<User> findAllUserOrderedByLastname();
 
     /**
      * Get a list all user.
      * 
      * @return List<User>
      */
-    List<User> findAllUsers();
+    Iterable<User> findAllUsers();
 
     /**
      * Save a new User.
@@ -71,7 +73,7 @@ public interface UserService {
      * 
      * @param id id of the user to delete.
      */
-    void deleteUserById(long id);
+    void deleteUserById(ObjectId id);
 
     /**
      * Update all information for a specific user.
